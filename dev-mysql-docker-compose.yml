@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+    board:
+        container_name: omichat
+        image: mysql:5.7.27
+        restart: always
+        environment:
+            - MYSQL_USER=omichat
+            - MYSQL_PASSWORD=omichat1!
+            - MYSQL_ROOT_PASSWORD=omichat1!
+            - MYSQL_DATABASE=omichat
+            - YZ=Asia/Seoul
+        ports:
+            - '3306:3306'
+        command:
+            [
+                'mysqld',
+                '--character-set-server=utf8mb4',
+                '--collation-server=utf8mb4_unicode_ci',
+            ]
+        volumes:
+            - './db-data/mysql:/var/lib/mysql'
