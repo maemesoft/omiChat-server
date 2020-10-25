@@ -1,1 +1,1 @@
-# omyChat-server
+# omiChat-server
