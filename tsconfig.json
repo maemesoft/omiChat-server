@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "lib": ["ES2017", "ESNext", "ESNext.AsyncIterable", "ES5", "ES6"],
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "skipDefaultLibCheck": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "target": "es5",
+        "outDir": "./build",
+        "skipLibCheck": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "include": ["src/**/*"],
+    "exclude": [
+        "node_modules",
+        ".serverless/**/*",
+        ".webpack/**/*",
+        "_warmup/**/*",
+        ".vscode/**/*"
+    ]
+}
