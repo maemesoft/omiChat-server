@@ -12,7 +12,7 @@ services:
             - MYSQL_DATABASE=omichat
             - YZ=Asia/Seoul
         ports:
-            - '3306:3306'
+            - '3309:3306'
         command:
             [
                 'mysqld',
