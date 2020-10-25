@@ -1,0 +1,14 @@
+{
+    "files.eol": "\n",
+    "remote.restoreForwardedPorts": true,
+    "editor.formatOnSave": true,
+    "jest.debugCodeLens.showWhenTestStateIn": [
+        "pass",
+        "skip",
+        "fail",
+        "unknown"
+    ],
+    "jest.enableSnapshotPreviews": false,
+    "jest.restartJestOnSnapshotUpdate": true,
+    "jest.pathToJest": "node_modules/.bin/jest --runInBand"
+}
