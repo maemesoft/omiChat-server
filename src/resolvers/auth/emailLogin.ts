@@ -15,7 +15,7 @@ export default async function emailLogin(email: string, password: string) {
         const result = await getRepository(User)
             .findOne({
                 where: { accountID: email },
-                relations: ['userProfile', 'character'],
+                relations: ['userProfile'],
             })
             .then(async (res) => {
                 // 만약 회원정보가 존재하지 않으면 ID Fail Error를 throw합니다

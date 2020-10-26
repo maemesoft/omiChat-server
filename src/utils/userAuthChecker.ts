@@ -38,7 +38,7 @@ export const userAuthChecker: AuthChecker<OmajuContext> = async ({
         // Find current user with given userId
         const user = await User.findOne({
             where: { id: tokenInfo.userId },
-            relations: ['userProfile', 'character', 'character.surveyAnswer'],
+            relations: ['userProfile'],
         });
 
         await connection.close();

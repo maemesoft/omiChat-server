@@ -56,7 +56,7 @@ export default async function emailRegister(
         const result = await getRepository(User)
             .findOne({
                 where: { accountID: email },
-                relations: ['userProfile', 'character'],
+                relations: ['userProfile'],
             })
             .then((res) => {
                 return res ? res : new Error('User Not Found');
