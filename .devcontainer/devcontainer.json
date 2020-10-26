@@ -22,6 +22,7 @@
     "extensions": [
         "esbenp.prettier-vscode",
         "orta.vscode-jest",
-        "visualstudioexptteam.vscodeintellicode"
+        "visualstudioexptteam.vscodeintellicode",
+        "yzhang.markdown-all-in-one"
     ]
 }
