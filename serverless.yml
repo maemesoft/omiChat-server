@@ -1,19 +1,19 @@
 service:
     name: omichat
-  # app and org for use with dashboard.serverless.com
-  #app: your-app-name
-  #org: your-org-name
-  
-#   package :
-#     individually: true
-#     include :
-#       - src/secret/omichat-firebase-service.json
-  
-  plugins:
+    # app and org for use with dashboard.serverless.com
+    #app: your-app-name
+    #org: your-org-name
+
+package:
+    individually: true
+    # include :
+    #   - src/secret/omichat-firebase-service.json
+
+plugins:
     - serverless-plugin-typescript
     - serverless-offline
-  
-  provider:
+
+provider:
     name: aws
     runtime: nodejs12.x
     region: ap-northeast-2
@@ -27,66 +27,65 @@ service:
     #     - subnet-xxxxxxxx
     #     - subnet-xxxxxxxx
     apiGateway:
-      minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+        minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
     environment:
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-      SLS_DEBUG: true
-      NODE_DEV: ${self:provider.stage}
-      MYSQL_HOST: ${self:custom.mysqlHost.${self:provider.stage}}
-      MYSQL_PORT: ${self:custom.mysqlPort.${self:provider.stage}}
-      MYSQL_USER: ${self:custom.mysqlUser.${self:provider.stage}}
-      MYSQL_PASS: ${self:custom.mysqlPass.${self:provider.stage}}
-      MYSQL_DATABASE: ${self:custom.mysqlDatabase.${self:provider.stage}}
-      MYSQL_SYNC: ${self:custom.mysqlSync.${self:provider.stage}}
-      MYSQL_LOG: ${self:custom.mysqlLog.${self:provider.stage}}
-      PLAYGROUND_ENDPOINT: ${self:custom.playgroundEndpoint.${self:provider.stage}}
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+        SLS_DEBUG: true
+        NODE_DEV: ${self:provider.stage}
+        MYSQL_HOST: ${self:custom.mysqlHost.${self:provider.stage}}
+        MYSQL_PORT: ${self:custom.mysqlPort.${self:provider.stage}}
+        MYSQL_USER: ${self:custom.mysqlUser.${self:provider.stage}}
+        MYSQL_PASS: ${self:custom.mysqlPass.${self:provider.stage}}
+        MYSQL_DATABASE: ${self:custom.mysqlDatabase.${self:provider.stage}}
+        MYSQL_SYNC: ${self:custom.mysqlSync.${self:provider.stage}}
+        MYSQL_LOG: ${self:custom.mysqlLog.${self:provider.stage}}
+        PLAYGROUND_ENDPOINT: ${self:custom.playgroundEndpoint.${self:provider.stage}}
     iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - "s3:*"
-        Resource: "arn:aws:s3:::sls-board-upload/*"
-  
-  custom:
+        - Effect: 'Allow'
+          Action:
+              - 's3:*'
+          Resource: 'arn:aws:s3:::sls-board-upload/*'
+
+custom:
     playgroundEndpoint:
-      dev: "/graphql"
-      product: "/product/graphql"
+        dev: '/graphql'
+        product: '/product/graphql'
     serverless-offline:
-      port: 3000
+        port: 3000
     stages:
-      - dev
-      - product
+        - dev
+        - product
     mysqlHost:
-      dev: "localhost"
-      product: "localhsot"
+        dev: 'localhost'
+        product: 'localhsot'
     mysqlPort:
-      dev: 3309
-      product: 3306
+        dev: 3309
+        product: 3306
     mysqlUser:
-      dev: "omichat"
-      product: "omichat"
+        dev: 'omichat'
+        product: 'omichat'
     mysqlPass:
-      dev: "omichat1!"
-      product: "omichat1!"
+        dev: 'omichat1!'
+        product: 'omichat1!'
     mysqlDatabase:
-      dev: "omichat"
-      product: "omichat"
+        dev: 'omichat'
+        product: 'omichat'
     mysqlSync:
-      dev: true
-      product: true
+        dev: true
+        product: true
     mysqlLog:
-      dev: "all"
-      product: "all"
-  
-  functions:
+        dev: 'all'
+        product: 'all'
+
+functions:
     graphql:
-      handler: src/utils/graphql.handler
-      events:
-        - http:
-            path: /graphql
-            method: get
-            cors: true
-        - http:
-            path: /graphql
-            method: post
-            cors: true
-  
+        handler: src/utils/graphql.handler
+        events:
+            - http:
+                  path: /graphql
+                  method: get
+                  cors: true
+            - http:
+                  path: /graphql
+                  method: post
+                  cors: true
