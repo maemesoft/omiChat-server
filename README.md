@@ -6,7 +6,7 @@ omiChat 채팅 서버
  - MySQL (Tested v5.7.27)
  
 ## Development Stack
- - Severless
+ - Serverless
  - Serverless-offline
  - Serverless-plugin-typescript
  - Typeorm
