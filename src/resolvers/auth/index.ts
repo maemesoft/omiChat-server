@@ -1,13 +1,9 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
-import { getRepository } from 'typeorm';
-import bcrypt from 'bcryptjs';
-
-import database from '../../utils/database';
 import { User } from '../../entities/User';
-import { Profile } from '../../entities/Profile';
 import { OmajuContext } from '../../utils/userAuthChecker';
 import emailLogin from './emailLogin';
 import emailRegister from './emailRegister';
+import { tokenIssue } from './tokenussue';
 
 @Resolver()
 export default class AuthResolver {
@@ -39,13 +35,21 @@ export default class AuthResolver {
      * @param nickname 회원가입시 사용할 닉네임을 입력합니다
      * @param phoneNum 회원가입시 사용할 전화번호를 입력합니다
      */
-    @Mutation((type) => User)
+    @Mutation((type) => String)
     public async setRegister(
         @Arg('email') email: string,
         @Arg('password') password: string,
         @Arg('nickname') nickname: string,
         @Arg('phoneNum') phoneNum: string
-    ): Promise<User | Error> {
-        return await emailRegister(email, password, nickname, phoneNum);
+    ): Promise<String | Error> {
+        const result = await emailRegister(email, password, nickname, phoneNum);
+
+        if (result instanceof Error) {
+            return result;
+        }
+
+        // result에 포함된 id를 이용하여 Token을 발급합니다
+        const token = tokenIssue(result.id);
+        return token;
     }
 }
