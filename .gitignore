@@ -12,5 +12,6 @@ jspm_packages
 
 .build
 db-data
+data/db
 /src/config.ts
 /src/utils/secret.ts
