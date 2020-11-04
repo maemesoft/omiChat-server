@@ -3,8 +3,6 @@ import { getRepository } from 'typeorm';
 import { User } from '../../entities/User';
 import { Profile } from '../../entities/Profile';
 import database from '../../utils/database';
-import Axios from 'axios';
-import config from '../../config';
 
 /**
  * @description 이메일을 이용하여 회원가입을 진행합니다. 만약 사용하고자 하는 이메일, 닉네임이 존재할 경우 Error를 반환합니다
@@ -64,51 +62,7 @@ export default async function emailRegister(
                 return res ? res : new Error('User Not Found');
             });
 
-        try {
-            const username = String(user.id);
-
-            const userCreateResult = await Axios.post(
-                `${config['RocketChat-Host']}/api/v1/users.create`,
-                {
-                    email: email,
-                    name: nickname,
-                    password: hashedPassword,
-                    username: username,
-                },
-                {
-                    headers: {
-                        'X-Auth-Token': config['X-Auth-Token'],
-                        'X-User-Id': config['X-User-Id'],
-                        'Content-type': 'application/json',
-                    },
-                }
-            );
-
-            const userCreateTokenResult = await Axios.post(
-                `${config['RocketChat-Host']}/api/v1/users.createToken`,
-                {
-                    username: username,
-                },
-                {
-                    headers: {
-                        'X-Auth-Token': config['X-Auth-Token'],
-                        'X-User-Id': config['X-User-Id'],
-                        'Content-type': 'application/json',
-                    },
-                }
-            );
-
-            const chatToken = userCreateTokenResult.data.data.authToken;
-            const chatUserID = userCreateTokenResult.data.data.userId;
-            user.chatToken = chatToken;
-            user.chatUserID = chatUserID;
-            await user.save();
-        } catch (e) {
-            console.log(e);
-        }
-
         await connection.close();
-
         return result;
     });
 }

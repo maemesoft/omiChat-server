@@ -38,12 +38,6 @@ export class User extends BaseEntity {
     @CreateDateColumn()
     public joinDate: Date;
 
-    @Column({ nullable: true })
-    public chatToken: string;
-
-    @Column({ nullable: true })
-    public chatUserID: string;
-
     // User's suspected Case IDs
     @Field((type) => [String])
     @Column('simple-array', { nullable: true })
