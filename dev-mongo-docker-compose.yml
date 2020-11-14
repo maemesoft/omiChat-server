@@ -8,3 +8,5 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: omichat
             MONGO_INITDB_ROOT_PASSWORD: omichat1!
+        volumes:
+            - './db-data/mongdb:/data/db'
