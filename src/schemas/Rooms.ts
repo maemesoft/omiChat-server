@@ -3,11 +3,6 @@ import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
 export class u {
-    // User Id
-    @Field()
-    @prop()
-    _id?: string;
-
     // User Username
     @Field()
     @prop()
@@ -16,26 +11,22 @@ export class u {
 
 @ObjectType()
 export class RoomsClass {
-    // Room Id
-    @Field()
-    @prop()
-    _id?: string;
-
     // Room Type
-    // c = channel
-    // d = direct
-    // p (change to g) = group
-    // v = visitor
+    // Channel
+    // Direct
+    // Group (Private)
+    // Visitor
     @Field()
-    @prop()
-    t?: string;
+    @prop({ required: true })
+    type: string;
 
     // Room Creation Timestamp
     @Field()
-    @prop()
-    ts?: Date;
+    @prop({ default: () => Date.now() })
+    createdAt?: Date;
 
-    // Room Name (t:d -> empty)
+    // Room Name
+    // type:Direct -> empty
     @Field()
     @prop()
     name?: string;
@@ -43,7 +34,7 @@ export class RoomsClass {
     // Last Message Timestamp
     @Field()
     @prop()
-    lm?: Date;
+    lastMessageTime?: Date;
 
     // Messages Counter
     @Field()
@@ -68,7 +59,7 @@ export class RoomsClass {
     // Owner User
     @Field((type) => u)
     @prop({ ref: () => u })
-    u?: Ref<u>;
+    ownerUser?: Ref<u>;
 }
 
 const Rooms = getModelForClass(RoomsClass);
