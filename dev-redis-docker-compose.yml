@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+    omichat_redis:
+        container_name: omichat_redis
+        image: redis
+        command: redis-server --requirepass omichat1! --port 6379
+        restart: always
+        ports:
+            - 6379:6379
