@@ -53,6 +53,8 @@ export async function createHandler() {
             endpoint: `${process.env.PLAYGROUND_ENDPOINT}`,
         },
 
+        introspection: true,
+
         // Context is a object that passed to every resolver that executes for a particular operation
         // This enables resolvers to share helpful context, such as a database connection
         // Make Server Connection with
