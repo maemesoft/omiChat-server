@@ -1,15 +1,46 @@
-import 'reflect-metadata';
 import {
-    APIGatewayProxyEvent,
-    APIGatewayProxyResult,
-    Callback,
-    Context,
-} from 'aws-lambda';
+    DynamoDBEventProcessor,
+    DynamoDBConnectionManager,
+    DynamoDBEventStore,
+    DynamoDBSubscriptionManager,
+    PubSub,
+    Server,
+    withFilter,
+} from 'aws-lambda-graphql';
+import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk';
+import resolvers from '../resolvers';
 import { GraphQLSchema } from 'graphql';
 import { buildSchemaSync } from 'type-graphql';
-import { ApolloServer } from 'apollo-server-lambda';
 import { userAuthChecker } from './userAuthChecker';
-import resolvers from '../resolvers';
+
+// serverless offline support
+const dynamoDbClient = new DynamoDB.DocumentClient({
+    // use serverless-dynamodb endpoint in offline mode
+    ...(process.env.IS_OFFLINE
+        ? {
+              endpoint: 'http://localhost:8000',
+          }
+        : {}),
+});
+
+const eventStore = new DynamoDBEventStore({ dynamoDbClient });
+const pubSub = new PubSub({ eventStore });
+const subscriptionManager = new DynamoDBSubscriptionManager({ dynamoDbClient });
+const connectionManager = new DynamoDBConnectionManager({
+    // this one is weird but we don't care because you'll use it only if you want to use serverless-offline
+    // why is it like that? because we are extracting api gateway endpoint from received events
+    // but serverless offline has wrong stage and domainName values in event provided to websocket handler
+    // so we need to override the endpoint manually
+    // please do not use it otherwise because we need correct endpoint, if you use it similarly as dynamoDBClient above
+    // you'll end up with errors
+    apiGatewayManager: process.env.IS_OFFLINE
+        ? new ApiGatewayManagementApi({
+              endpoint: 'http://localhost:3001',
+          })
+        : undefined,
+    dynamoDbClient,
+    subscriptions: subscriptionManager,
+});
 
 // Variable that store created GraphQLSchema
 let schema: GraphQLSchema;
@@ -31,59 +62,27 @@ export const createSchema = () => {
     return schema;
 };
 
-/**
- * @description schema를 이용하여 GraphQL Handler를 생성, 반환하는 함수입니다.
- * @returns {function(event: APIGatewayProxyEvent, context: Context, callback: Callback<APIGatewayProxyResult>) => void}
- */
-export async function createHandler() {
-    // If schema is not exist, then createSchema and assign it
-    if (!schema) {
-        schema = createSchema();
-    }
-
-    // To See more about ApolloServer's Constructor Parameter
-    // See the Documentation below
-    // https://www.apollographql.com/docs/apollo-server/api/apollo-server/
-    const server = new ApolloServer({
-        schema: schema,
-
-        // To work playground properly, we muse define endpoint here
-        // Environment Variable "PLAYGROUND_ENDPOINT" is defined under environment in serverless.yml
-        playground: {
-            endpoint: `${process.env.PLAYGROUND_ENDPOINT}`,
-        },
-
-        introspection: true,
-
-        // Context is a object that passed to every resolver that executes for a particular operation
-        // This enables resolvers to share helpful context, such as a database connection
-        // Make Server Connection with
-        context: function context({ event, context }) {
-            context.callbackWaitsForEmptyEventLoop = false;
-
-            // The return value of context will be passed to every resolver calls
-            // To pass HTTP header properly to resolver, we need to return value below
-            return {
-                headers: event.headers,
-                event: event,
-                context: context,
-            };
-        },
-    });
-
-    return server.createHandler({ cors: { origin: '*', credentials: false } });
+// If schema is not exist, then createSchema and assign it
+if (!schema) {
+    schema = createSchema();
 }
 
-export function handler(
-    event: APIGatewayProxyEvent,
-    context: Context,
-    callback: Callback<APIGatewayProxyResult>
-) {
-    context.callbackWaitsForEmptyEventLoop = false;
+const server = new Server({
+    connectionManager,
+    eventProcessor: new DynamoDBEventProcessor(),
+    schema: schema,
+    subscriptionManager,
+    introspection: true,
+    // use serverless-offline endpoint in offline mode
+    ...(process.env.IS_OFFLINE
+        ? {
+              playground: {
+                  subscriptionEndpoint: 'ws://localhost:3001',
+              },
+          }
+        : {}),
+});
 
-    // Get serverHandler from createHandler
-    // Execute serverHandler function with given event, context, callback
-    createHandler().then((handler) => {
-        return handler(event, context, callback);
-    });
-}
+export const handleHttp = server.createHttpHandler();
+export const handleWebSocket = server.createWebSocketHandler();
+export const handleDynamoDBStream = server.createEventHandler();
