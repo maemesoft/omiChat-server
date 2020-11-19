@@ -10,3 +10,5 @@ services:
             MONGO_INITDB_ROOT_PASSWORD: omichat1!
         volumes:
             - './db-data/mongdb:/data/db'
+        ports:
+            - '27017:27017'
