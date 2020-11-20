@@ -14,6 +14,22 @@ import { buildSchemaSync } from 'type-graphql';
 import { userAuthChecker } from './userAuthChecker';
 import * as assert from 'assert';
 import { ulid } from 'ulid';
+import { mongoose } from '@typegoose/typegoose';
+import env from './Env';
+
+// mongoose로 서버와 데이터베이스 연결
+mongoose
+    .connect(env.MONGO_URI, {
+        useNewUrlParser: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true,
+    })
+    .then(() => {
+        console.log('Connected to MongoDB');
+    })
+    .catch((e) => {
+        console.error(e);
+    });
 
 // serverless offline support
 const dynamoDbClient = new DynamoDB.DocumentClient({
@@ -31,7 +47,14 @@ const dynamoDbClient = new DynamoDB.DocumentClient({
 // 우리는 DynamoDB를 영구 저장소로 사용하기로 결정했기 때문에 이를 이벤트 소스로 사용할 것입니다.
 const eventStore = new DynamoDBEventStore({ dynamoDbClient });
 
-const pubSub = new PubSub({ eventStore });
+// PubSub는 이벤트 퍼블리싱 및 구독을 담당합니다.
+// 누구나 broadcastMessage mutation(publish)을 사용하여 메시지를 브로드캐스팅 할 수 있으며,
+// WebSocket을 통해 연결된 모든 사용자는 브로드캐스트된 메시지를 수신하기 위해 messageBroadcast를 사용할 수 있습니다.
+const pubSub = new PubSub({
+    eventStore,
+    // optional, if you don't want to store messages to your store as JSON
+    // serializeEventPayload: false,
+});
 
 // [ https://github.com/michalkvasnicak/aws-lambda-graphql ]
 // GraphQL 서버는 람다가 상태를 저장하지 않기 때문에 연결과 구독을 저장하는 방법을 알아야합니다.
@@ -77,7 +100,7 @@ const connectionManager = new DynamoDBConnectionManager({
 // };
 
 // 주어진 스키마에서 우리는 브로드캐스팅된 메시지를 어떻게든 게시하고 처리해야한다는 것을 이미 알고 있습니다.
-// For that purpose we must create a PubSub instance that uses our DynamoDB event store as underlying storage for events.
+// 이를 위해 DynamoDB 이벤트 스토어를 이벤트의 기본 스토리지로 사용하는 PubSub 인스턴스를 생성해야 합니다.
 // const typeDefs = /* GraphQL */ `
 //     enum MessageType {
 //         greeting
@@ -159,9 +182,16 @@ if (!schema) {
     schema = createSchema();
 }
 
+// 이제 GraphQL 스키마가 완료되었습니다.
+// 이제 Lambda 서버에서 수신 한 HTTP 및 WebSocket 이벤트를 실제로 처리하고
+// 구독된 클라이언트에 메시지를 보낼 수 있도록 서버를 인스턴스화 할 수 있습니다.
 const server = new Server({
-    connectionManager,
+    // 구독한 클라이언트에게 메시지를 보내려면 Event processor가 필요합니다.
+    // 이벤트 프로세서는 이벤트 스토어에 게시된 이벤트를 처리하고
+    // 해당 이벤트를 구독하는 모든 연결로 전송합니다.
+    // DynamoDB를 이벤트 스토어로 사용하기 때문에 DynamoDBEventProcessor를 사용할 것입니다.
     eventProcessor: new DynamoDBEventProcessor(),
+    connectionManager,
     schema: schema,
     subscriptionManager,
     introspection: true,
