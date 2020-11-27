@@ -2,14 +2,6 @@ import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
-export class u {
-    // User Username
-    @Field()
-    @prop({ required: true })
-    username: string;
-}
-
-@ObjectType()
 export class MessageClass {
     // The room id - Identify the room the message belongs
     @prop({ required: true })
@@ -39,9 +31,10 @@ export class MessageClass {
     @Field()
     editedAt?: Date;
 
-    @Field((type) => u)
-    @prop({ ref: () => u })
-    editedBy?: Ref<u>;
+    // User Username
+    @Field()
+    @prop({ required: true })
+    username: string;
 }
 
 const Message = getModelForClass(MessageClass);

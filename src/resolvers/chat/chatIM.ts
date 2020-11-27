@@ -12,12 +12,17 @@ export async function chatIMCreate(
     });
     await room.save();
 
-    const result = {
-        type: room.type,
-        name: room.name,
-        usernames: room.usernames,
-        createdAt: room.createdAt,
-    };
+    // const result = {
+    //     type: room.type,
+    //     name: room.name,
+    //     usernames: room.usernames,
+    //     createdAt: room.createdAt,
+    // };
 
-    return result;
+    return room;
+}
+
+export async function chatIMExist(roomName: string): Promise<Boolean> {
+    console.log(Rooms.findOne().where('name').equals(roomName));
+    return false;
 }

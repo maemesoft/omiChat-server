@@ -1,13 +1,5 @@
 import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
-import { Field, ObjectType } from 'type-graphql';
-
-@ObjectType()
-export class u {
-    // User Username
-    @Field()
-    @prop()
-    username?: string;
-}
+import { Field, Int, ObjectType } from 'type-graphql';
 
 @ObjectType()
 export class RoomsClass {
@@ -37,7 +29,7 @@ export class RoomsClass {
     lastMessageTime?: Date;
 
     // Messages Counter
-    @Field()
+    @Field((type) => Int)
     @prop()
     msgs?: number;
 
@@ -52,14 +44,14 @@ export class RoomsClass {
     ro?: boolean;
 
     // Room Users
-    @Field()
+    @Field((type) => [String])
     @prop({ type: () => [String] })
     usernames?: string[];
 
     // Owner User
-    @Field((type) => u)
-    @prop({ ref: () => u })
-    ownerUser?: Ref<u>;
+    @Field()
+    @prop()
+    ownerUser?: string;
 }
 
 const Rooms = getModelForClass(RoomsClass);
